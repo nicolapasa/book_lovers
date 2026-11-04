@@ -18,7 +18,7 @@ class BookManagementController extends Controller
 {
     public function search(Request $request, GoogleBooks $google): JsonResponse
     {
-        $data = $request->validate(['title' => ['required', 'string', 'min:2', 'max:200'], 'author' => ['nullable', 'string', 'max:150'], 'locale' => ['required', 'in:it,en']]);
+        $data = $request->validate(['title' => ['nullable', 'string', 'min:2', 'max:200'], 'author' => ['nullable', 'string', 'max:150'], 'locale' => ['required', 'in:it,en']]);
         try {
             $results = $google->search($data['title'], $data['author'] ?? null, $data['locale']);
             $t = fn (string $it, string $en): string => app()->getLocale() === 'en' ? $en : $it;
