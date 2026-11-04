@@ -195,7 +195,7 @@ class LibraryController extends Controller
 
                 return [
                     'id' => $entry->id, 'title' => $metadata['title'] ?? $book->title, 'author' => implode(', ', $authors),
-                    'authors' => $authors, 'cover' => $entry->cover_path ? '/app/entries/'.$entry->id.'/cover' : $book->cover_url,
+                    'authors' => $authors, 'cover' => $entry->cover_path ? url('/app/entries/'.$entry->id.'/cover') : $book->cover_url,
                     'genres' => isset($metadata['genres']) ? collect($metadata['genres'])->map(fn ($name) => ['it' => $name, 'en' => $name]) : $book->genres->map(fn ($genre) => ['it' => $genre->name_it, 'en' => $genre->name_en]),
                     'publisher' => array_key_exists('publisher', $metadata) ? $metadata['publisher'] : $book->publisher?->name,
                     'pages' => array_key_exists('pages', $metadata) ? $metadata['pages'] : $book->page_count,

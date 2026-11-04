@@ -1,12 +1,13 @@
 let language=localStorage.getItem('book-lovers-language')||'it';
 if(!['it','en'].includes(language))language='it';
 let csrf=document.querySelector('meta[name="csrf-token"]').content;
+export const appUrl=new URL(document.querySelector('meta[name="app-url"]').content.replace(/\/$/,'')+'/',location.origin);
 export const locale=()=>language;
 export const t=(it,en)=>language==='it'?it:en;
 export function setLocale(value){language=value==='en'?'en':'it';localStorage.setItem('book-lovers-language',language);}
 export async function request(path,method='GET',body){
     const multipart=body instanceof FormData;
-    const response=await fetch('/app'+path,{method,credentials:'same-origin',headers:{Accept:'application/json','X-CSRF-TOKEN':csrf,'X-Locale':language,...(!multipart?{'Content-Type':'application/json'}:{})},...(body===undefined?{}:{body:multipart?body:JSON.stringify(body)})});
+    const response=await fetch(new URL('app'+path,appUrl),{method,credentials:'same-origin',headers:{Accept:'application/json','X-CSRF-TOKEN':csrf,'X-Locale':language,...(!multipart?{'Content-Type':'application/json'}:{})},...(body===undefined?{}:{body:multipart?body:JSON.stringify(body)})});
     const data=await response.json().catch(()=>({}));
     if(data.csrf)csrf=data.csrf;
     if(!response.ok){

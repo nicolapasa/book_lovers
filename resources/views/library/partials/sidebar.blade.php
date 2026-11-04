@@ -1,5 +1,5 @@
 <aside class="sidebar" aria-label="{{ $t('Menu principale', 'Main menu') }}">
-    <a class="brand" href="/"><span class="brand-mark"><x-icon name="book"/></span><span class="brand-name">book<span>lovers</span></span></a>
+    <a class="brand" href="{{ url('/') }}"><span class="brand-mark"><x-icon name="book"/></span><span class="brand-name">book<span>lovers</span></span></a>
     <div class="nav-label">{{ $t('Il tuo spazio', 'Your space') }}</div>
     <nav>
         @foreach ([['library', 'library', $t('La mia libreria', 'My library')], ['explore', 'compass', $t('Esplora librerie', 'Explore libraries')], ['friends', 'users', $t('Amici e affiliazioni', 'Friends & connections')], ['reviews', 'review', $t('Recensioni', 'Reviews')], ['stats', 'chart', $t('Le mie statistiche', 'My statistics')]] as [$key, $symbol, $label])

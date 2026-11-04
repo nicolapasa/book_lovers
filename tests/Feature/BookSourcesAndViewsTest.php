@@ -68,7 +68,7 @@ class BookSourcesAndViewsTest extends TestCase
     public function test_search_returns_a_blade_fragment_and_selected_volume_is_imported(): void
     {
         Http::fake([
-            'www.googleapis.com/books/v1/volumes/italian-edition' => Http::response($this->volume()),
+            'www.googleapis.com/books/v1/volumes/italian-edition*' => Http::response($this->volume()),
             'www.googleapis.com/books/v1/volumes?*' => Http::response(['items' => [$this->volume()]]),
         ]);
         $user = User::factory()->create();

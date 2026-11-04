@@ -1,4 +1,4 @@
-import {request,t,locale,setLocale} from './library/http.js';
+import {request,t,locale,setLocale,appUrl} from './library/http.js';
 import {importCodes} from './library/import.js';
 
 const app=document.getElementById('app');
@@ -18,7 +18,7 @@ async function load(url=new URL(location.href),push=false){
     document.documentElement.lang=locale();document.title='Book Lovers — '+result.title;
     if(push)history.pushState({},'',url);
 }
-function pageUrl(page){const url=new URL('/',location.origin);url.searchParams.set('view',page);if(pageState.library_id)url.searchParams.set('library',pageState.library_id);return url;}
+function pageUrl(page){const url=new URL(appUrl);url.searchParams.set('view',page);if(pageState.library_id)url.searchParams.set('library',pageState.library_id);return url;}
 async function dialog(kind,entry=null){
     const params=new URLSearchParams({kind});
     if(pageState.library_id)params.set('library',pageState.library_id);
@@ -49,7 +49,7 @@ document.addEventListener('click',async event=>{
         if(action==='mark-read'){const field=document.getElementById('progress');field.value=100;document.getElementById('progress-value').textContent='100%';return;}
         if(action==='copy'){try{await navigator.clipboard.writeText(button.dataset.url);toast(t('Link copiato.','Link copied.'));}catch{toast(t('Seleziona e copia il link qui sopra.','Select and copy the link above.'));}return;}
         button.disabled=true;
-        if(action==='logout'){await request('/logout','POST',{});modal.close();await load(new URL('/',location.origin),true);return;}
+        if(action==='logout'){await request('/logout','POST',{});modal.close();await load(new URL(appUrl),true);return;}
         if(action==='visibility'){await request(`/libraries/${pageState.library_id}`,'PATCH',{is_public:value==='true'});await refreshDialog();return;}
         if(action==='affiliate'){const result=await request(`/libraries/${id}/affiliations`,'POST',{});toast(result.status==='accepted'?t('Sei già affiliato.','You are already connected.'):t('Richiesta registrata.','Request recorded.'));return;}
         if(action==='respond'){await request(`/affiliations/${id}`,'PATCH',{status:value});await load();return;}
@@ -67,7 +67,7 @@ document.addEventListener('submit',async event=>{
         const type=form.dataset.form;
         const fields=Object.fromEntries(new FormData(form));
         if(type==='filter'){const url=new URL(location.href);if(!['library','public'].includes(url.searchParams.get('view')||'library'))url.searchParams.set('view','library');url.searchParams.set('q',fields.q);await load(url,true);return;}
-        if(type==='register'||type==='login'){await request('/'+type,'POST',{...fields,locale:locale()});modal.close();await load(new URL('/',location.origin),true);toast(t('Benvenuto nella tua libreria.','Welcome to your library.'));return;}
+        if(type==='register'||type==='login'){await request('/'+type,'POST',{...fields,locale:locale()});modal.close();await load(new URL(appUrl),true);toast(t('Benvenuto nella tua libreria.','Welcome to your library.'));return;}
         if(type==='library'){const result=await request('/libraries','POST',fields);modal.close();const url=pageUrl('library');url.searchParams.set('library',result.id);await load(url,true);return;}
         if(type==='progress'){await request(`/entries/${form.dataset.entry}/progress`,'PATCH',{progress:Number(fields.progress)});await load();toast(t('Progresso salvato.','Progress saved.'));return;}
         if(type==='review'){if(!Number(fields.rating))throw new Error(t('Scegli da 1 a 5 stelle.','Choose from 1 to 5 stars.'));await request(`/entries/${form.dataset.entry}/review`,'PUT',{rating:Number(fields.rating),body:fields.body,locale:locale()});await refreshDialog();toast(t('Valutazione salvata.','Rating saved.'));return;}
