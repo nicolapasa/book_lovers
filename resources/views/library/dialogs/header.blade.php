@@ -1,0 +1,1 @@
+<div class="modal-header"><div><h2 id="modal-title">{{ $dialogTitle }}</h2>@isset($dialogSubtitle)<p>{{ $dialogSubtitle }}</p>@endisset</div><button type="button" class="icon-button" data-action="close" aria-label="{{ $t('Chiudi', 'Close') }}"><x-icon name="close"/></button></div>

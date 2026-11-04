@@ -1,0 +1,7 @@
+<form data-form="{{ $register ? 'register' : 'login' }}">@csrf
+    @if($register)<label class="field" for="auth-name">{{ $t('Nome', 'Name') }}</label><input class="input" id="auth-name" name="name" autocomplete="name" maxlength="100" required>@endif
+    <label class="field" for="auth-email">Email</label><input class="input" id="auth-email" name="email" type="email" autocomplete="email" required>
+    <label class="field" for="auth-password">Password</label><input class="input" id="auth-password" name="password" type="password" autocomplete="{{ $register ? 'new-password' : 'current-password' }}" @if($register) minlength="12" @endif maxlength="128" required>
+    @if($register)<p class="hint">{{ $t('Almeno 12 caratteri.', 'At least 12 characters.') }}</p><label class="field" for="auth-confirm">{{ $t('Conferma password', 'Confirm password') }}</label><input class="input" id="auth-confirm" name="password_confirmation" type="password" autocomplete="new-password" minlength="12" maxlength="128" required>@endif
+    <p class="form-error" role="alert"></p><div class="modal-actions"><button type="button" class="button secondary" data-action="dialog" data-kind="{{ $register ? 'login' : 'auth' }}">{{ $register ? $t('Hai già un account? Accedi', 'Already registered? Sign in') : $t('Crea un account', 'Create an account') }}</button><button class="button primary" type="submit">{{ $register ? $t('Crea la tua libreria', 'Create your library') : $t('Accedi', 'Sign in') }}</button></div>
+</form>

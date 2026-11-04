@@ -1,0 +1,3 @@
+@forelse($results as $result)
+    <article class="search-result"><div><h3>{{ $result['title'] }}</h3><p>{{ $result['author'] }}</p><p class="hint">{{ $result['publisher'] }} · {{ $result['date'] }} · {{ $result['language'] }}</p><p class="hint">{{ implode(' · ', $result['identifiers']) }}</p></div><button class="button primary small" data-action="select-volume" data-id="{{ $result['id'] }}">{{ $t('Scegli questa edizione', 'Choose this edition') }}</button></article>
+@empty<p class="notice">{{ $t('Nessun risultato. Puoi inserire il libro manualmente.', 'No results. You can add the book manually.') }}</p>@endforelse

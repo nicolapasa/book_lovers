@@ -1,0 +1,4 @@
+<section class="hero">
+    <div><div class="eyebrow">{{ $state['user'] ? $t('BENTORNATO', 'WELCOME BACK').', '.$state['user']['name'] : $t('IL TUO PROSSIMO CAPITOLO', 'YOUR NEXT CHAPTER') }}</div><h2>{{ $t('Tra le pagine,', 'Between the pages,') }}<br>{{ $t('il tuo mondo.', 'your world.') }}</h2><p>{{ $t('Coltiva la tua libreria e lascia che le belle storie ti trovino.', 'Grow your library and let the good stories find you.') }}</p><button class="hero-link" data-action="nav" data-view="explore">{{ $t('Scopri le librerie della community', 'Discover the community’s libraries') }}<x-icon name="arrow"/></button></div>
+    <div class="hero-art" aria-hidden="true"><span class="art-spark">✧</span><span class="art-leaf"></span><span class="illustrated-book one">piccole meraviglie</span><span class="illustrated-book two">STORIES TO KEEP</span><span class="illustrated-book three">tra le pagine</span></div>
+</section>
