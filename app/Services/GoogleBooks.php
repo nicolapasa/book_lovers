@@ -43,15 +43,19 @@ class GoogleBooks
     }
 
     /** @return array<int, array<string, mixed>> */
-    public function search(string $title, ?string $author, string $locale): array
+    public function search(?string $title, ?string $author, string $locale): array
     {
-        $query = 'intitle:'.str_replace('"', '', $title);
-        if ($author) {
-            $query .= ' inauthor:'.str_replace('"', '', $author);
+        $terms = [];
+        if ($title) {
+            $terms[] = 'intitle:'.str_replace('"', '', $title);
         }
+        if ($author) {
+            $terms[] = 'inauthor:'.str_replace('"', '', $author);
+        }
+        $query = implode(' ', $terms);
         $results = $this->get('volumes', ['q' => $query, 'maxResults' => 20, 'langRestrict' => $locale, 'printType' => 'books']);
 
-        return collect($results['items'] ?? [])->filter(fn (array $volume): bool => isset($volume['id'], $volume['volumeInfo']['title']))->map(fn (array $volume): array => [
+        return collect($results['items'] ?? [])->filter(fn (array $volume): bool => isset($volume['id'], $volume['volumeInfo']['title']) && ($volume['volumeInfo']['language'] ?? null) === $locale)->map(fn (array $volume): array => [
             'id' => $volume['id'], 'title' => $volume['volumeInfo']['title'],
             'author' => implode(', ', $volume['volumeInfo']['authors'] ?? []),
             'publisher' => $volume['volumeInfo']['publisher'] ?? null,

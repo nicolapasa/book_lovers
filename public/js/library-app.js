@@ -1,5 +1,5 @@
 import {request,t,locale,setLocale,appUrl} from './library/http.js';
-import {importCodes} from './library/import.js';
+import {importCodes,importSelectedVolumes} from './library/import.js';
 
 const app=document.getElementById('app');
 const modal=document.getElementById('modal');
@@ -60,7 +60,7 @@ document.addEventListener('click',async event=>{
 });
 
 document.addEventListener('submit',async event=>{
-    const form=event.target.closest('form[data-form]');if(!form)return;event.preventDefault();if(form.dataset.busy)return;
+    const form=event.target.closest('form[data-form]');if(!form)return;event.preventDefault();if(form.dataset.busy||importing&&modal.contains(form))return;
     form.dataset.busy='true';const submit=form.querySelector('[type="submit"]');if(submit)submit.disabled=true;
     const error=form.querySelector('.form-error');if(error)error.textContent='';
     try{
@@ -73,6 +73,7 @@ document.addEventListener('submit',async event=>{
         if(type==='review'){if(!Number(fields.rating))throw new Error(t('Scegli da 1 a 5 stelle.','Choose from 1 to 5 stars.'));await request(`/entries/${form.dataset.entry}/review`,'PUT',{rating:Number(fields.rating),body:fields.body,locale:locale()});await refreshDialog();toast(t('Valutazione salvata.','Rating saved.'));return;}
         if(type==='import'){importing=true;await importCodes(form,pageState.library_id);await load();toast(t('Importazione completata. Controlla gli esiti.','Import complete. Check the results.'));return;}
         if(type==='search'){const result=await request('/books/search?'+new URLSearchParams(fields));document.getElementById('search-results').innerHTML=result.html;return;}
+        if(type==='select-volumes'){importing=true;await importSelectedVolumes(form,pageState.library_id);await load();toast(t('Importazione completata. Controlla gli esiti accanto ai libri.','Import complete. Check the results beside each book.'));return;}
         if(type==='metadata'){const result=await request(form.dataset.entry?`/entries/${form.dataset.entry}/metadata`:`/libraries/${pageState.library_id}/books`,'POST',new FormData(form));await load();await dialog('detail',result.id);toast(t('Dati salvati nella tua libreria.','Details saved in your library.'));}
     }catch(exception){if(error)error.textContent=errorText(exception);else toast(errorText(exception));}finally{importing=false;delete form.dataset.busy;if(submit)submit.disabled=false;}
 });

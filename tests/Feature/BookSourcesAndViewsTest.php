@@ -80,6 +80,71 @@ class BookSourcesAndViewsTest extends TestCase
         $this->assertDatabaseCount('books', 1);
     }
 
+    public function test_google_books_can_be_searched_by_author_without_a_title(): void
+    {
+        Http::fake(['www.googleapis.com/books/v1/volumes?*' => Http::response(['items' => [$this->volume()]])]);
+        $this->actingAs(User::factory()->create());
+
+        foreach (['', '&title='] as $title) {
+            $this->getJson('/app/books/search?author=Stephen%20King&locale=it'.$title)
+                ->assertOk()->assertJsonPath('results.0.id', 'italian-edition');
+        }
+
+        Http::assertSentCount(2);
+        Http::assertSent(fn ($request): bool => $request['q'] === 'inauthor:Stephen King' && $request['langRestrict'] === 'it');
+    }
+
+    public function test_google_books_can_still_be_searched_by_title_only(): void
+    {
+        $volume = $this->volume('english-edition');
+        $volume['volumeInfo']['language'] = 'en';
+        Http::fake(['www.googleapis.com/books/v1/volumes?*' => Http::response(['items' => [$volume]])]);
+
+        $this->actingAs(User::factory()->create())->getJson('/app/books/search?title=It&locale=en')
+            ->assertOk()->assertJsonPath('results.0.id', 'english-edition');
+
+        Http::assertSent(fn ($request): bool => $request['q'] === 'intitle:It' && $request['langRestrict'] === 'en');
+    }
+
+    public function test_google_books_search_only_returns_editions_in_the_selected_language(): void
+    {
+        $italian = $this->volume();
+        $english = $this->volume('english-edition');
+        $english['volumeInfo']['language'] = 'en';
+        $unknown = $this->volume('unknown-language');
+        unset($unknown['volumeInfo']['language']);
+        Http::fake(['www.googleapis.com/books/v1/volumes?*' => Http::response(['items' => [$english, $unknown, $italian]])]);
+        $this->actingAs(User::factory()->create());
+
+        foreach (['it' => 'italian-edition', 'en' => 'english-edition'] as $locale => $volumeId) {
+            $response = $this->getJson('/app/books/search?author=Stephen%20King&locale='.$locale)
+                ->assertOk()->assertJsonCount(1, 'results')->assertJsonPath('results.0.id', $volumeId);
+            $this->assertStringNotContainsString('unknown-language', $response->json('html'));
+        }
+    }
+
+    public function test_google_books_search_returns_no_results_when_no_editions_match_the_language(): void
+    {
+        $volume = $this->volume('english-edition');
+        $volume['volumeInfo']['language'] = 'en';
+        Http::fake(['www.googleapis.com/books/v1/volumes?*' => Http::response(['items' => [$volume]])]);
+
+        $this->actingAs(User::factory()->create())->getJson('/app/books/search?author=Stephen%20King&locale=it')
+            ->assertOk()->assertJsonCount(0, 'results');
+    }
+
+    public function test_google_books_search_requires_a_title_or_author(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        foreach (['', '&title=&author=', '&title=%20%20&author=%20%20'] as $fields) {
+            $this->getJson('/app/books/search?locale=it'.$fields)
+                ->assertUnprocessable()->assertJsonValidationErrors(['title', 'author']);
+        }
+
+        Http::assertNothingSent();
+    }
+
     public function test_manual_addition_works_without_an_isbn_or_external_services(): void
     {
         $user = User::factory()->create();
